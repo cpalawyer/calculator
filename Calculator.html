@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Savings Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            background-color: #e7f3e7;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+            text-align: center;
+            color: #333;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            max-width: 150px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo">
+        <img src="logo.png" alt="Company Logo">
+    </div>
+    <h1>Tax Savings Calculator</h1>
+
+    <label for="income">Total Income ($):</label>
+    <input type="number" id="income" step="0.01" placeholder="Enter your total income">
+
+    <label for="salary">Reasonable Salary for S Corp ($):</label>
+    <input type="number" id="salary" step="0.01" placeholder="Enter a reasonable salary">
+
+    <button onclick="calculateTax()">Calculate</button>
+
+    <div id="result" class="result" style="display: none;">
+        <p>Sole Proprietorship Self-Employment Tax: $<span id="solePropTax">0.00</span></p>
+        <p>S Corporation Payroll Taxes: $<span id="sCorpTax">0.00</span></p>
+        <p>Tax Savings with S Corporation: $<span id="taxSavings">0.00</span></p>
+    </div>
+</div>
+
+<script>
+    function calculateTax() {
+        const income = parseFloat(document.getElementById('income').value) || 0;
+        const salary = parseFloat(document.getElementById('salary').value) || 0;
+
+        // Calculate Sole Proprietorship Self-Employment Tax using the new formula
+        const selfEmploymentTax = calculateSelfEmploymentTax(income);
+
+        // Calculate S Corporation Payroll Taxes
+        const payrollTaxes = calculatePayrollTaxes(salary);
+
+        // Calculate tax savings
+        const taxSavings = selfEmploymentTax - payrollTaxes;
+
+        // Display the result
+        document.getElementById('solePropTax').innerText = selfEmploymentTax.toFixed(2);
+        document.getElementById('sCorpTax').innerText = payrollTaxes.toFixed(2);
+        document.getElementById('taxSavings').innerText = taxSavings.toFixed(2);
+        document.getElementById('result').style.display = 'block';
+    }
+
+    function calculateSelfEmploymentTax(income) {
+        // Self-employment tax formula: total income * 0.9235 * 0.153
+        return roundToTwoDecimalPlaces(income * 0.9235 * 0.153);
+    }
+
+    function calculatePayrollTaxes(salary) {
+        const SOCIAL_SECURITY_RATE = 0.062;
+        const MEDICARE_RATE = 0.0145;
+        const ADDITIONAL_MEDICARE_RATE = 0.009;
+        const FUTA_RATE = 0.006;
+        const FUTA_WAGE_BASE = 7000;
+        const SOCIAL_SECURITY_LIMIT = 160200;
+
+        // Social Security tax
+        const socialSecurityTax = Math.min(salary, SOCIAL_SECURITY_LIMIT) * SOCIAL_SECURITY_RATE;
+
+        // Medicare tax
+        const medicareTax = salary * MEDICARE_RATE;
+
+        // Additional Medicare tax
+        const additionalMedicareTax = salary > 200000 ? (salary - 200000) * ADDITIONAL_MEDICARE_RATE : 0;
+
+        // FUTA tax
+        const futaTax = Math.min(salary, FUTA_WAGE_BASE) * FUTA_RATE;
+
+        // Total payroll taxes
+        return roundToTwoDecimalPlaces(socialSecurityTax + medicareTax + additionalMedicareTax + futaTax);
+    }
+
+    function roundToTwoDecimalPlaces(value) {
+        return Math.round(value * 100) / 100;
+    }
+</script>
+
+</body>
+</html>
